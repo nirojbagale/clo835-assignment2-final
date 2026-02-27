@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy
+  namespace: web-ns
+  labels:
+    app: employees
+    tier: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: employees
+      tier: frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: employees
+        tier: frontend
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: web
+          image: 823015708374.dkr.ecr.us-east-1.amazonaws.com/clo835-webapp:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DBHOST
+              value: "mysql-svc.mysql-ns.svc.cluster.local"
+            - name: DBUSER
+              value: "root"
+            - name: DBPWD
+              value: "pw"
+            - name: DATABASE
+              value: "employees"
+            - name: DBPORT
+              value: "3306"
+            - name: APP_COLOR
+              value: "lime"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 15
