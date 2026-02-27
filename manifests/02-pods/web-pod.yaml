@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: web-pod
+  namespace: web-ns
+  labels:
+    app: employees
+    tier: frontend
+spec:
+  imagePullSecrets:
+    - name: ecr-secret
+  containers:
+    - name: web
+      image: 823015708374.dkr.ecr.us-east-1.amazonaws.com/clo835-webapp:latest
+      ports:
+        - containerPort: 8080
+      env:
+        - name: DBHOST
+          value: "mysql-svc.mysql-ns.svc.cluster.local"
+        - name: DBUSER
+          value: "root"
+        - name: DBPWD
+          value: "pw"
+        - name: DATABASE
+          value: "employees"
+        - name: DBPORT
+          value: "3306"
+        - name: APP_COLOR
+          value: "lime"
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "100m"
+        limits:
+          memory: "128Mi"
+          cpu: "200m"
